@@ -166,3 +166,7 @@ Icon
 Network Trash Folder
 Temporary Items
 .apdisk
+
+
+# PyCharm gitignores
+.idea/
