@@ -20,6 +20,8 @@ class CSV2Internal:
         if not filename:
             self.run_count += 1
             filename = f"untitled{self.run_count}.csv"
+            logging.debug(f'No filename given; defaulting to <{filename}>')
+        logging.info(f'Converting <{filename}> to internal format...')
         logging.debug('Resetting instance variables')
         self.tempo = 0
         self.time_signature = None
@@ -34,7 +36,7 @@ class CSV2Internal:
         interleaved = self.interleave()
         logging.info('Parsing interleaved data')
         out = self.parse(interleaved)
-        print(f'Done converting: <{filename}>')
+        coloredLogging.printc(coloredLogging.GREEN, f'Done converting: <{filename}>')
         return out
 
     def interleave(self):
@@ -156,12 +158,10 @@ class CSV2Internal:
         return out
 
 
-# Press the green button in the gutter to run the script.
+# Debug on a test file if running the file directly
 if __name__ == '__main__':
     logging.getLogger().setLevel(logging.DEBUG)
     coloredLogging.apply()
     with open('./test/resources/haydn_7_1.csv') as f:
         converter = CSV2Internal(5)
         converter.convert(f.read(), basename(f.name))
-
-
