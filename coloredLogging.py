@@ -1,25 +1,28 @@
 import logging
+import sys
 
-GREY = "\x1b[90;21m"
-YELLOW = "\x1b[33;21m"
-GREEN = "\x1b[32;21m"
-BLUE = "\x1b[34;21m"
-PURPLE = "\x1b[35;21m"
-CYAN = "\x1b[36;21m"
-RED = "\x1b[31;21m"
-BOLD_RED = "\x1b[31;1m"
-RESET = "\x1b[0m"
+COLS = {
+    'grey':   '\x1b[90m',
+    'red':    '\x1b[31m',
+    'green':  '\x1b[32m',
+    'blue':   '\x1b[34m',
+    'cyan':   '\x1b[36m',
+    'purple': '\x1b[35m',
+    'yellow': '\x1b[33m',
+    'error':  '\x1b[31;1m',
+    'reset':  '\x1b[0m'
+}
 
 
-class ColorfulFormatter(logging.Formatter):
-    format = "%(levelname)s: %(message)s (%(filename)s:%(lineno)d)"
+class _ColorFormatter(logging.Formatter):
+    errFormat = "%(levelname)s: %(message)s    (%(filename)s:%(lineno)d)"
 
     FORMATS = {
-        logging.DEBUG: GREY + format + RESET,
-        logging.INFO: BLUE + format + RESET,
-        logging.WARNING: YELLOW + format + RESET,
-        logging.ERROR: RED + format + RESET,
-        logging.CRITICAL: BOLD_RED + format + RESET
+        logging.DEBUG: COLS['grey'] + '%(message)s    (%(filename)s:%(lineno)d)' + COLS['reset'],
+        logging.INFO: COLS['blue'] + '%(message)s' + COLS['reset'],
+        logging.WARNING: COLS['yellow'] + errFormat + COLS['reset'],
+        logging.ERROR: COLS['red'] + errFormat + COLS['reset'],
+        logging.CRITICAL: COLS['error'] + errFormat + COLS['reset']
     }
 
     def format(self, record):
@@ -28,16 +31,24 @@ class ColorfulFormatter(logging.Formatter):
         return formatter.format(record)
 
 
-def apply(logger=logging.getLogger()):
+def init_colors(logger=logging.getLogger()):
     # create console handler with a higher log level
-    ch = logging.StreamHandler()
+    ch = logging.StreamHandler(sys.stdout)
     ch.setLevel(logging.DEBUG)
 
-    ch.setFormatter(ColorfulFormatter())
+    ch.setFormatter(_ColorFormatter())
 
     logger.addHandler(ch)
 
 
 def printc(col, *args, **kwargs):
-    msg = col + ' '.join(map(str, args)) + RESET
+    msg = COLS[col] + ' '.join(map(str, args)) + COLS['reset']
     print(msg, **kwargs)
+
+
+def printHeader(*args, **kwargs):
+    print('')
+    printc('yellow', '#' * 80)
+    print(*args, **kwargs)
+    printc('yellow', '#' * 80)
+    print('')
