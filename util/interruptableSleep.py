@@ -1,5 +1,4 @@
 from threading import Thread, Event
-from time import sleep
 
 _startEvent = Event()
 _inputEvent = Event()
@@ -24,7 +23,7 @@ worker.setDaemon(True)
 worker.start()
 
 
-class Interrupt_Poller:
+class InterruptPoller:
     def __init__(self, timeout):
         """
         A polled object that will remain 'alive' until [ENTER] is pressed, or for a maximum of [timeout] seconds.
@@ -65,26 +64,3 @@ def sleep_or_enter(timeout):
     
     _startEvent.set()
     return _inputEvent.wait(timeout)
-    
-
-def _tryInterrupt():
-    import coloredLogging
-    coloredLogging.init_colors()
-    interrupter_1 = Interrupt_Poller(4)
-    interrupter_2 = Interrupt_Poller(6)
-    wasDone1 = False
-    wasDone2 = False
-    print('Started timers.')
-    while interrupter_1.is_alive() or interrupter_2.is_alive():
-        sleep(0.1)
-        if not (interrupter_1.is_alive() or wasDone1):
-            print('1 is done')
-            wasDone1 = True
-        if not (interrupter_2.is_alive() or wasDone2):
-            print('2 is done')
-            wasDone2 = True
-    print('done')
-
-
-if __name__ == '__main__':
-    _tryInterrupt()
