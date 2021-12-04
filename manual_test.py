@@ -36,9 +36,25 @@ def interruptableSleep():
     print('done')
 
 
+def _help():
+    print('Some manual tests.')
+    print('Usage: manual_test.py [tests]')
+    print('Available tests:')
+    for name in tests.keys():
+        print(f'  {name}')
+    print('  help')
+    print('  all')
+    exit(0)
+
+
+def _all():
+    for test in tests.values():
+        test()
+
+
 tests = {
-    '--player': player,
-    '--interrupt': interruptableSleep
+    'interrupt': interruptableSleep,
+    'player': player,
 }
 
 
@@ -46,8 +62,20 @@ def main():
     logging.getLogger().setLevel(logging.DEBUG)
     cl.init_colors()
     
+    if len(sys.argv) == 1 or 'help' in sys.argv:
+        _help()
+        return
+        
+    if 'all' in sys.argv:
+        _all()
+        return
+    
     for arg in sys.argv[1:]:
-        tests[arg]()
+        try:
+            tests[arg]()
+        except KeyError:
+            logging.error(f'Unknown test: {arg}\nTo see a list of accepted flags, run with no arguments')
+            exit(0)
 
 
 if __name__ == '__main__':
