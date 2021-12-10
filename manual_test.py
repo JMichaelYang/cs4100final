@@ -2,6 +2,8 @@ import sys
 import logging
 import util.coloredLogging as cl
 
+PLAYER_PATH = 'D:\\development\\source\\school\\cs4100\\generated'
+FILE_NAME = '294_SidePocket_03_04PointsCalculation.exprsco.pkl'
 
 def player():
     from expressive.codec import loadFile
@@ -9,7 +11,7 @@ def player():
     
     cl.printHeader('Testing expressive.player')
     
-    data = loadFile('./test/resources/295_SilverSurfer_02_03SectionStart.exprsco.pkl')
+    data = loadFile(f'{PLAYER_PATH}\\{FILE_NAME}')
     play(data)
 
 
@@ -36,6 +38,28 @@ def interruptableSleep():
     print('done')
 
 
+def internalCodec():
+    from expressive.codec import loadFile
+    from expressive.player import play
+    from internal.internalCodec import expressiveToInternal, internalToExpressive
+    import numpy as np
+    
+    cl.printHeader('Testing expressive.player')
+    
+    data = loadFile('./test/resources/295_SilverSurfer_02_03SectionStart.exprsco.pkl')
+
+    internal = expressiveToInternal(data)
+
+    newData = internalToExpressive(internal)
+
+    print('Data: ', data)
+    print('New Data: ', newData)
+
+    assert np.array_equiv(newData, data)
+
+    play(newData)
+
+
 def _help():
     print('Some manual tests.')
     print('Usage: manual_test.py [tests]')
@@ -55,6 +79,7 @@ def _all():
 tests = {
     'interrupt': interruptableSleep,
     'player': player,
+    'internalCodec': internalCodec
 }
 
 
