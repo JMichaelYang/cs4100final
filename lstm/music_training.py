@@ -7,6 +7,8 @@ import torch.nn as nn
 import torch.optim as optim
 from pathlib import Path
 import random
+import logging
+from util.coloredLogging import printHeader
 
 SONG_TIME_SECONDS = 30
 HIDDEN_DIMENSION = 15
@@ -16,7 +18,7 @@ BASE_WRITE_PATH = r'./generated'
 
 def getRandomFile():
     files = Path(BASE_FILE_PATH).rglob('*.exprsco.pkl')
-    return files[random.randrange(len(files))]
+    return random.choice(list(files))
 
 
 def convertFile(path):
@@ -50,6 +52,8 @@ def trainSong(model, path, loss_function, optimizer):
 
 
 def trainModel(num_songs):
+    printHeader('Training model')
+
     model = lstm.MusicLSTM(HIDDEN_DIMENSION)
     loss_function = nn.MSELoss()
     optimizer = optim.SGD(model.parameters(), lr=0.1)
@@ -57,12 +61,12 @@ def trainModel(num_songs):
 
     for _ in range(num_songs):
         if len(queue) == 0:
-            queue = Path(BASE_FILE_PATH).rglob('*.exprsco.pkl')
+            queue = list(Path(BASE_FILE_PATH).rglob('*.exprsco.pkl'))
             random.shuffle(queue)
         filepath = queue.pop()
-        print(f'Training on: {filepath}')
-        avg_loss = trainSong(model, f'{BASE_FILE_PATH}\\{filepath}', loss_function, optimizer)
-        print(f'Average loss: {avg_loss}')
+        logging.debug(f'Training on: {filepath}')
+        avg_loss = trainSong(model, filepath, loss_function, optimizer)
+        logging.debug(f'Average loss: {avg_loss}')
 
     return model
 
@@ -82,9 +86,15 @@ def makeSong(model, path):
     return song
 
 
-def runModel(model, num_songs):
+def runModel(model, num_songs, save=True):
+    basepath = Path(BASE_FILE_PATH)
+    outs = []
     for _ in range(num_songs):
         filepath = getRandomFile()
-        song = makeSong(model, f'{BASE_FILE_PATH}/{filepath}')
+        song = makeSong(model, filepath)
         exprsco = int_codec.internalToExpressive(song)
-        codec.saveFile(f'{BASE_WRITE_PATH}/{filepath}', exprsco)
+        outs.append(exprsco)
+        if save:
+            outpath = Path(BASE_WRITE_PATH).joinpath(Path(filepath).relative_to(basepath))
+            codec.saveFile(outpath, exprsco)
+    return outs
