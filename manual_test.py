@@ -2,8 +2,7 @@ import sys
 import logging
 import util.coloredLogging as cl
 
-PLAYER_PATH = 'D:\\development\\source\\school\\cs4100\\generated'
-FILE_NAME = '294_SidePocket_03_04PointsCalculation.exprsco.pkl'
+TEST_EXPRSCO = r'./test/resources/295_SilverSurfer_02_03SectionStart.exprsco.pkl'
 
 def player():
     from expressive.expressiveCodec import loadFile
@@ -11,7 +10,7 @@ def player():
     
     cl.printHeader('Testing expressive.player')
     
-    data = loadFile(f'{PLAYER_PATH}\\{FILE_NAME}')
+    data = loadFile(TEST_EXPRSCO)
     play(data)
 
 
@@ -46,7 +45,7 @@ def internalCodec():
     
     cl.printHeader('Testing expressive.player')
     
-    data = loadFile('./test/resources/295_SilverSurfer_02_03SectionStart.exprsco.pkl')
+    data = loadFile(TEST_EXPRSCO)
 
     internal = expressiveToInternal(data)
 
@@ -61,7 +60,7 @@ def internalCodec():
 
 
 def _help():
-    print('Some manual tests.')
+    print('A file that allows us to manually run tests that may or may not conform to unit test standards.')
     print('Usage: manual_test.py [tests]')
     print('Available tests:')
     for name in tests.keys():
