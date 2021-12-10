@@ -6,7 +6,7 @@ PLAYER_PATH = 'D:\\development\\source\\school\\cs4100\\generated'
 FILE_NAME = '294_SidePocket_03_04PointsCalculation.exprsco.pkl'
 
 def player():
-    from expressive.codec import loadFile
+    from expressive.expressiveCodec import loadFile
     from expressive.player import play
     
     cl.printHeader('Testing expressive.player')
@@ -39,9 +39,9 @@ def interruptableSleep():
 
 
 def internalCodec():
-    from expressive.codec import loadFile
+    from expressive.expressiveCodec import loadFile
     from expressive.player import play
-    from internal.internalCodec import expressiveToInternal, internalToExpressive
+    from expressive.internalCodec import expressiveToInternal, internalToExpressive
     import numpy as np
     
     cl.printHeader('Testing expressive.player')

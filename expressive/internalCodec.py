@@ -1,6 +1,5 @@
 import torch
 import numpy as np
-from sklearn.preprocessing import MinMaxScaler
 
 def expressiveToInternal(expressive):
 	# Normalizes our values

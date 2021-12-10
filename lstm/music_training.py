@@ -1,5 +1,5 @@
 import lstm.music_lstm as lstm
-import expressive.codec as codec
+import expressive.expressiveCodec as codec
 import expressive.internalCodec as int_codec
 import numpy
 import torch
