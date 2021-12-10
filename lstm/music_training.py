@@ -1,5 +1,6 @@
 import music_lstm as lstm
 import expressive.codec as codec
+import expressive.internalCodec as int_codec
 import torch.nn as nn
 import torch.optim as optim
 import os
@@ -14,7 +15,7 @@ def getRandomFile():
 
 def convertFile(path):
   exprsco = codec.loadFile(path)
-  return expressiveToInternal(exprsco)
+  return int_codec.expressiveToInternal(exprsco)
 
 def trainSong(model, path, loss_function, optimizer):
   internal = convertFile(path)
@@ -38,3 +39,5 @@ def trainModel(num_songs):
   for _ in range(num_songs):
     filepath = getRandomFile()
     trainSong(model, filepath, loss_function, optimizer)
+
+  return model
