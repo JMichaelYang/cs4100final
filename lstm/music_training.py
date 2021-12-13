@@ -11,7 +11,7 @@ import logging
 from util.coloredLogging import printHeader
 
 SONG_TIME_SECONDS = 30
-HIDDEN_DIMENSION = 32
+HIDDEN_DIMENSION = 512
 BASE_FILE_PATH = r'./nesmdb24_exprsco/train'
 BASE_WRITE_PATH = r'./generated'
 
@@ -51,7 +51,7 @@ def trainSong(model, path, loss_function, optimizer):
     return total_loss / (len(internal) - 1)
 
 
-def trainModel(num_songs):
+def trainModel(num_songs, cuda_enabled=False):
     printHeader('Training model')
 
     model = lstm.MusicLSTM(HIDDEN_DIMENSION)

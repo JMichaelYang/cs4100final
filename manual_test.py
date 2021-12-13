@@ -2,14 +2,15 @@ import sys
 import logging
 import util.coloredLogging as cl
 
-TEST_EXPRSCO = r'./test/resources/295_SilverSurfer_02_03SectionStart.exprsco.pkl'
+TEST_EXPRSCO = r'./generated/174_ImageFight_01_02IntroductionStage1.exprsco.pkl'
+
 
 def player():
     from expressive.expressiveCodec import loadFile
     from expressive.player import play
-    
+
     cl.printHeader('Testing expressive.player')
-    
+
     data = loadFile(TEST_EXPRSCO)
     play(data)
 
@@ -17,12 +18,12 @@ def player():
 def interruptableSleep():
     import util.interruptableSleep as iSleep
     from time import sleep
-    
+
     cl.printHeader('Testing util.interruptableSleep')
-    
+
     interrupter_1 = iSleep.InterruptPoller(2)
     interrupter_2 = iSleep.InterruptPoller(3)
-    
+
     was_done1 = False
     was_done2 = False
     print('Started timers.')
@@ -42,9 +43,9 @@ def internalCodec():
     from expressive.player import play
     from expressive.internalCodec import expressiveToInternal, internalToExpressive
     import numpy as np
-    
+
     cl.printHeader('Testing expressive.player')
-    
+
     data = loadFile(TEST_EXPRSCO)
 
     internal = expressiveToInternal(data)
@@ -85,20 +86,21 @@ tests = {
 def main():
     logging.getLogger().setLevel(logging.DEBUG)
     cl.init_colors()
-    
+
     if len(sys.argv) == 1 or 'help' in sys.argv:
         _help()
         return
-        
+
     if 'all' in sys.argv:
         _all()
         return
-    
+
     for arg in sys.argv[1:]:
         try:
             tests[arg]()
         except KeyError:
-            logging.error(f'Unknown test: {arg}\nTo see a list of accepted flags, run with no arguments')
+            logging.error(
+                f'Unknown test: {arg}\nTo see a list of accepted flags, run with no arguments')
             exit(0)
 
 
