@@ -76,4 +76,6 @@ def runModel(model, num_songs):
     filepath = getRandomFile()
     song = makeSong(model, f'{BASE_FILE_PATH}\\{filepath}')
     exprsco = int_codec.internalToExpressive(song)
+    sco_reshape = exprsco.reshape(exprsco.shape[0], -1)
+    numpy.savetxt(f'{BASE_WRITE_PATH}\\{filepath}.txt', sco_reshape, fmt='%3d')
     codec.saveFile(f'{BASE_WRITE_PATH}\\{filepath}', exprsco)

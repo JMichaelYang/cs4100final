@@ -15,5 +15,7 @@ class MusicLSTM(nn.Module):
     self.double()
 
   def forward(self, timestep):
+    print(f'timestep: {timestep}')
     lstm_out, _ = self.lstm(timestep)
+    print(f'lstm_out: {lstm_out}')
     return lstm_out
