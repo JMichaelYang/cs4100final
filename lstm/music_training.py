@@ -11,7 +11,7 @@ import logging
 from util.coloredLogging import printHeader
 
 SONG_TIME_SECONDS = 30
-HIDDEN_DIMENSION = 15
+HIDDEN_DIMENSION = 32
 BASE_FILE_PATH = r'./nesmdb24_exprsco/train'
 BASE_WRITE_PATH = r'./generated'
 
@@ -72,29 +72,6 @@ def trainModel(num_songs):
 
 
 def makeSong(model, path):
-<<<<<<< HEAD
-  song = numpy.empty((0, 15))
-  data = convertFile(path)
-  data = data[0]
-  data = torch.unsqueeze(data, dim=0)
-  data = torch.unsqueeze(data, dim=0)
-
-  for _ in range(SONG_TIME_SECONDS * 24):
-    data = model(data)
-    next_step = data.detach().numpy()[0][0]
-    song = numpy.append(song, numpy.array([next_step]), axis=0)
-
-  return song
-
-def runModel(model, num_songs):
-  for _ in range(num_songs):
-    filepath = getRandomFile()
-    song = makeSong(model, f'{BASE_FILE_PATH}\\{filepath}')
-    exprsco = int_codec.internalToExpressive(song)
-    sco_reshape = exprsco.reshape(exprsco.shape[0], -1)
-    numpy.savetxt(f'{BASE_WRITE_PATH}\\{filepath}.txt', sco_reshape, fmt='%3d')
-    codec.saveFile(f'{BASE_WRITE_PATH}\\{filepath}', exprsco)
-=======
     song = numpy.empty((0, 15))
     data = convertFile(path)
     data = data[0]
@@ -116,9 +93,10 @@ def runModel(model, num_songs, save=True):
         filepath = getRandomFile()
         song = makeSong(model, filepath)
         exprsco = int_codec.internalToExpressive(song)
+        print(exprsco)
         outs.append(exprsco)
         if save:
-            outpath = Path(BASE_WRITE_PATH).joinpath(Path(filepath).relative_to(basepath))
+            outpath = Path(BASE_WRITE_PATH).joinpath(
+                Path(filepath).relative_to(basepath))
             codec.saveFile(outpath, exprsco)
     return outs
->>>>>>> 4ee98f4344688139297d7312552b272d5a994ab7
