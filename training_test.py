@@ -30,7 +30,7 @@ if '--help' in sys.argv:
     print('args:')
     print('  --no-save')
     print('  --play')
-    print('  --cuda    ' + ('(available)' if torch.cuda.is_available() else '(not available)'))
+    print('  --cpu')
     exit(0)
 
 num_songs = int(sys.argv[1]) if len(sys.argv) > 1 else DEFAULT_SONGS
@@ -43,7 +43,7 @@ wandb.config = {
 model = lstm.MusicLSTM(HIDDEN_DIMENSION)
 
 cuda_device = None
-if '--cuda' in sys.argv:
+if '--cpu' not in sys.argv:
     if torch.cuda.is_available():
         cuda_device = torch.cuda.current_device()
         logging.info('Using CUDA device: ' + torch.cuda.get_device_name(cuda_device))
