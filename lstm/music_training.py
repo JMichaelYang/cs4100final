@@ -59,7 +59,7 @@ def trainSong(model, path, loss_function, optimizer, cuda_device):
 def trainModel(model, num_songs, learning_rate, cuda_device=None):
     printHeader('Training model')
     loss_function = nn.MSELoss()
-    optimizer = optim.SGD(model.parameters(), lr=learning_rate)
+    optimizer = optim.Adam(model.parameters())
     queue = []
 
     if cuda_device is not None:
@@ -78,19 +78,19 @@ def trainModel(model, num_songs, learning_rate, cuda_device=None):
 
 def makeSong(model, path, cuda_device):
     song = numpy.empty((0, 15))
-    data = convertFile(path)
-    data = data[0]
-    data = prepareData(data, cuda_device)
+    seedSong = convertFile(path)
+    data = prepareData(seedSong[0], cuda_device)
 
     for _ in range(SONG_TIME_SECONDS * 24):
         data = model(data)
-        next_step = data.detach().numpy()[0][0]
+
+        next_step = data.detach().cpu().numpy()[0][0]
         song = numpy.append(song, numpy.array([next_step]), axis=0)
 
     return song
 
 
-def runModel(model, num_songs, learning_rate, save=True, cuda_device=None):
+def runModel(model, num_songs, save=True, cuda_device=None):
     basepath = Path(BASE_FILE_PATH)
     outs = []
     for _ in range(num_songs):
