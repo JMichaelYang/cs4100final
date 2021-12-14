@@ -1,6 +1,7 @@
 # Project-specific ignored files
 /nesmdb24_exprsco/
 /generated/
+/wandb/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
