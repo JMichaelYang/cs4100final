@@ -26,23 +26,28 @@ def convertFile(path):
     return int_codec.expressiveToInternal(exprsco)
 
 
-def prepareData(data):
+def prepareData(data, cuda_device):
     data = torch.unsqueeze(data, dim=0)
-    return torch.unsqueeze(data, dim=0)
+    data = torch.unsqueeze(data, dim=0)
+    if cuda_device is not None:
+        return data.cuda(cuda_device)
+    return data
 
 
-def trainSong(model, path, loss_function, optimizer):
+def trainSong(model, path, loss_function, optimizer, cuda_device):
     internal = convertFile(path)
+
     total_loss = 0
 
     # Clear the gradients
     model.zero_grad()
+    next_data = prepareData(internal[0], cuda_device)
 
     for i, data in enumerate(internal[:-1]):
         # Run forward pass and calculate loss
-        data = prepareData(data)
+        data = next_data
         predicted_data = model(data)
-        next_data = prepareData(internal[i + 1])
+        next_data = prepareData(internal[i + 1], cuda_device)
         loss = loss_function(predicted_data, next_data)
         total_loss += loss
         loss.backward()
@@ -51,7 +56,7 @@ def trainSong(model, path, loss_function, optimizer):
     return total_loss / (len(internal) - 1)
 
 
-def trainModel(num_songs, cuda_enabled=False):
+def trainModel(num_songs, cuda_device = None):
     printHeader('Training model')
 
     model = lstm.MusicLSTM(HIDDEN_DIMENSION)
@@ -59,24 +64,26 @@ def trainModel(num_songs, cuda_enabled=False):
     optimizer = optim.SGD(model.parameters(), lr=0.1)
     queue = []
 
+    if cuda_device is not None:
+        model.cuda(cuda_device)
+
     for _ in range(num_songs):
         if len(queue) == 0:
             queue = list(Path(BASE_FILE_PATH).rglob('*.exprsco.pkl'))
             random.shuffle(queue)
         filepath = queue.pop()
         logging.debug(f'Training on: {filepath}')
-        avg_loss = trainSong(model, filepath, loss_function, optimizer)
+        avg_loss = trainSong(model, filepath, loss_function, optimizer, cuda_device)
         logging.debug(f'Average loss: {avg_loss}')
 
     return model
 
 
-def makeSong(model, path):
+def makeSong(model, path, cuda_device):
     song = numpy.empty((0, 15))
     data = convertFile(path)
     data = data[0]
-    data = torch.unsqueeze(data, dim=0)
-    data = torch.unsqueeze(data, dim=0)
+    data = prepareData(data, cuda_device)
 
     for _ in range(SONG_TIME_SECONDS * 24):
         data = model(data)
