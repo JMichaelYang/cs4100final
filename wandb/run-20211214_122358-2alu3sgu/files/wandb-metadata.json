@@ -1,0 +1,26 @@
+{
+    "os": "Windows-10-10.0.19041-SP0",
+    "python": "3.6.8",
+    "heartbeatAt": "2021-12-14T17:24:00.633708",
+    "startedAt": "2021-12-14T17:23:58.700745",
+    "docker": null,
+    "gpu": "NVIDIA GeForce RTX 2070",
+    "gpu_count": 1,
+    "cpu_count": 12,
+    "cuda": null,
+    "args": [
+        "10"
+    ],
+    "state": "running",
+    "program": ".\\training_test.py",
+    "codePath": "training_test.py",
+    "git": {
+        "remote": "https://github.com/JMichaelYang/cs4100final.git",
+        "commit": "5b00dab2592e7ba99eeb53d88b10bbd9b39bcd76"
+    },
+    "email": "jaewonmichael@gmail.com",
+    "root": "D:/development/source/school/cs4100/cs4100final",
+    "host": "DESKTOP-ROJKBLM",
+    "username": "jaewon",
+    "executable": "C:\\Program Files\\Python36\\python.exe"
+}

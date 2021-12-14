@@ -1,4 +1,3 @@
-import lstm.music_lstm as lstm
 import expressive.expressiveCodec as codec
 import expressive.internalCodec as int_codec
 import numpy
@@ -9,9 +8,9 @@ from pathlib import Path
 import random
 import logging
 from util.coloredLogging import printHeader
+import wandb
 
 SONG_TIME_SECONDS = 30
-HIDDEN_DIMENSION = 512
 BASE_FILE_PATH = r'./nesmdb24_exprsco/train'
 BASE_WRITE_PATH = r'./generated'
 
@@ -44,6 +43,7 @@ def trainSong(model, path, loss_function, optimizer):
         predicted_data = model(data)
         next_data = prepareData(internal[i + 1])
         loss = loss_function(predicted_data, next_data)
+        wandb.log({'loss': loss})
         total_loss += loss
         loss.backward()
         optimizer.step()
@@ -51,12 +51,10 @@ def trainSong(model, path, loss_function, optimizer):
     return total_loss / (len(internal) - 1)
 
 
-def trainModel(num_songs, cuda_enabled=False):
+def trainModel(model, num_songs, learning_rate, cuda_enabled=False):
     printHeader('Training model')
-
-    model = lstm.MusicLSTM(HIDDEN_DIMENSION)
     loss_function = nn.MSELoss()
-    optimizer = optim.SGD(model.parameters(), lr=0.1)
+    optimizer = optim.SGD(model.parameters(), lr=learning_rate)
     queue = []
 
     for _ in range(num_songs):
@@ -64,9 +62,8 @@ def trainModel(num_songs, cuda_enabled=False):
             queue = list(Path(BASE_FILE_PATH).rglob('*.exprsco.pkl'))
             random.shuffle(queue)
         filepath = queue.pop()
-        logging.debug(f'Training on: {filepath}')
         avg_loss = trainSong(model, filepath, loss_function, optimizer)
-        logging.debug(f'Average loss: {avg_loss}')
+        logging.debug(f'Trained On: {filepath} / Average loss: {avg_loss}')
 
     return model
 
@@ -86,14 +83,13 @@ def makeSong(model, path):
     return song
 
 
-def runModel(model, num_songs, save=True):
+def runModel(model, num_songs, learning_rate, save=True):
     basepath = Path(BASE_FILE_PATH)
     outs = []
     for _ in range(num_songs):
         filepath = getRandomFile()
         song = makeSong(model, filepath)
         exprsco = int_codec.internalToExpressive(song)
-        print(exprsco)
         outs.append(exprsco)
         if save:
             outpath = Path(BASE_WRITE_PATH).joinpath(

@@ -2,7 +2,7 @@ import sys
 import logging
 import util.coloredLogging as cl
 
-TEST_EXPRSCO = r'./generated/174_ImageFight_01_02IntroductionStage1.exprsco.pkl'
+TEST_EXPRSCO = r'./generated/059_ContraForce_09_10Stage5.exprsco.pkl'
 
 
 def player():
@@ -49,11 +49,10 @@ def internalCodec():
     data = loadFile(TEST_EXPRSCO)
 
     internal = expressiveToInternal(data)
-
     newData = internalToExpressive(internal)
 
-    print('Data: ', data)
-    print('New Data: ', newData)
+    print('Data: ', data[0:10])
+    # print('New Data: ', newData)
 
     assert np.array_equiv(newData, data)
 
