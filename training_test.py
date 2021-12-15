@@ -11,6 +11,7 @@ import util.coloredLogging as cl
 
 
 def train(num_songs,
+          epochs,
           hidden_dimension,
           learning_rate,
           cuda_device,
@@ -35,6 +36,7 @@ def train(num_songs,
     model = training.trainModel(
         model,
         num_songs,
+        epochs,
         learning_rate,
         cuda_device,
         wandb_enable

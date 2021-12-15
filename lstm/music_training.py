@@ -32,13 +32,12 @@ def prepareData(data, cuda_device):
     return data
 
 
-def trainSong(model, path, loss_function, optimizer, cuda_device, wandb_enable):
+def trainSong(model, path, loss_function, optimizer, cuda_device, wandb_enable, epoch):
     internal = convertFile(path)
 
     total_loss = 0
 
     # Clear the gradients
-    model.zero_grad()
     next_data = prepareData(internal[0], cuda_device)
 
     for i, data in enumerate(internal[:-1]):
@@ -50,31 +49,32 @@ def trainSong(model, path, loss_function, optimizer, cuda_device, wandb_enable):
         total_loss += loss
         loss.backward()
     if wandb_enable:
-        wandb.log({'loss': (total_loss / len(internal))})
+        wandb.log({'loss': (total_loss / len(internal)), 'epoch': epoch})
     optimizer.step()
 
     return total_loss / (len(internal) - 1)
 
 
-def trainModel(model, num_songs, learning_rate, cuda_device=None, wandb_enable=True):
+def trainModel(model, num_songs, epochs, learning_rate, cuda_device=None, wandb_enable=True):
     printHeader('Training model')
     loss_function = nn.MSELoss()
     optimizer = optim.Adam(model.parameters())
     if learning_rate:
         optimizer.learning_rate = learning_rate
-    queue = []
+    queue = list(Path(BASE_FILE_PATH).rglob('*.exprsco.pkl'))
+    random.shuffle(queue)
+    queue = queue[:num_songs]
 
     if cuda_device is not None:
         model.cuda(cuda_device)
 
-    for index in range(num_songs):
-        if len(queue) == 0:
-            queue = list(Path(BASE_FILE_PATH).rglob('*.exprsco.pkl'))
-            random.shuffle(queue)
-        filepath = queue.pop()
-        avg_loss = trainSong(model, filepath, loss_function, optimizer, cuda_device, wandb_enable)
-        logging.debug(f'Trained on: {filepath} / Average loss: {avg_loss}')
-        logging.info(f'{100 * index // num_songs}% ({index} / {num_songs})')
+    for epoch in range(epochs):
+        random.shuffle(queue)
+        model.zero_grad()
+        for index, filepath in enumerate(queue):
+            avg_loss = trainSong(model, filepath, loss_function, optimizer, cuda_device, wandb_enable, epoch)
+            logging.debug(f'Trained on: {filepath} / Average loss: {avg_loss}')
+            logging.info(f'{100 * index // (epoch * num_songs)}% ({index} / {epoch * num_songs})')
 
     return model
 

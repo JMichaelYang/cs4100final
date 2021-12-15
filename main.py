@@ -86,6 +86,7 @@ def main():
             cuda_device = init_cuda(not namespace.cpu)
 
             model = train(namespace.input_songs,
+                          namespace.epochs,
                           namespace.hidden_size,
                           namespace.learning_rate,
                           cuda_device,
@@ -93,7 +94,10 @@ def main():
 
             if namespace.output_songs:
                 cl.printHeader(f'Generating {namespace.output_songs} song{"s" if namespace.output_songs > 1 else ""}')
-                training_output = generate_songs(model, namespace.output_folder, namespace.output_songs, cuda_device)
+                training_output = generate_songs(model,
+                                                 namespace.output_folder if (not namespace.no_save) else None,
+                                                 namespace.output_songs,
+                                                 cuda_device)
 
         if namespace.program == 'play':
             cl.printHeader('    Playing file')
