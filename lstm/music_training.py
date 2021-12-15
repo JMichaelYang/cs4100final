@@ -47,11 +47,11 @@ def trainSong(model, path, loss_function, optimizer, cuda_device, wandb_enable):
         predicted_data = model(data)
         next_data = prepareData(internal[i + 1], cuda_device)
         loss = loss_function(predicted_data, next_data)
-        if wandb_enable:
-            wandb.log({'loss': loss})
         total_loss += loss
         loss.backward()
-        optimizer.step()
+    if wandb_enable:
+        wandb.log({'loss': (total_loss / len(internal))})
+    optimizer.step()
 
     return total_loss / (len(internal) - 1)
 

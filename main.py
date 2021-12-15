@@ -20,6 +20,9 @@ parser_train = subparsers.add_parser('train', help="Train a new model")
 parser_train.add_argument('--input-songs', type=int, default=25,
                           help='How many epochs to train the model')
 
+parser_train.add_argument('--epochs', type=int, default=25,
+                          help='How many times to run over the input data')
+
 parser_train.add_argument('--cpu', action='store_true', default=False)
 
 parser_train.add_argument('--no-save', action='store_true', default=False)
