@@ -1,5 +1,5 @@
-import expressive.expressiveCodec as codec
-import expressive.internalCodec as int_codec
+import expressive.expressiveCodec as ExpressiveCodec
+import expressive.internalCodec as InternalCodec
 import numpy
 import torch
 import torch.nn as nn
@@ -12,7 +12,6 @@ import wandb
 
 SONG_TIME_SECONDS = 30
 BASE_FILE_PATH = r'./nesmdb24_exprsco/train'
-BASE_WRITE_PATH = r'./generated'
 
 
 def getRandomFile():
@@ -21,8 +20,8 @@ def getRandomFile():
 
 
 def convertFile(path):
-    exprsco = codec.loadFile(path)
-    return int_codec.expressiveToInternal(exprsco)
+    exprsco = ExpressiveCodec.loadFile(path)
+    return InternalCodec.expressiveToInternal(exprsco)
 
 
 def prepareData(data, cuda_device):
@@ -33,7 +32,7 @@ def prepareData(data, cuda_device):
     return data
 
 
-def trainSong(model, path, loss_function, optimizer, cuda_device):
+def trainSong(model, path, loss_function, optimizer, cuda_device, wandb_enable):
     internal = convertFile(path)
 
     total_loss = 0
@@ -48,7 +47,8 @@ def trainSong(model, path, loss_function, optimizer, cuda_device):
         predicted_data = model(data)
         next_data = prepareData(internal[i + 1], cuda_device)
         loss = loss_function(predicted_data, next_data)
-        wandb.log({'loss': loss})
+        if wandb_enable:
+            wandb.log({'loss': loss})
         total_loss += loss
         loss.backward()
         optimizer.step()
@@ -56,22 +56,25 @@ def trainSong(model, path, loss_function, optimizer, cuda_device):
     return total_loss / (len(internal) - 1)
 
 
-def trainModel(model, num_songs, learning_rate, cuda_device=None):
+def trainModel(model, num_songs, learning_rate, cuda_device=None, wandb_enable=True):
     printHeader('Training model')
     loss_function = nn.MSELoss()
     optimizer = optim.Adam(model.parameters())
+    if learning_rate:
+        optimizer.learning_rate = learning_rate
     queue = []
 
     if cuda_device is not None:
         model.cuda(cuda_device)
 
-    for _ in range(num_songs):
+    for index in range(num_songs):
         if len(queue) == 0:
             queue = list(Path(BASE_FILE_PATH).rglob('*.exprsco.pkl'))
             random.shuffle(queue)
         filepath = queue.pop()
-        avg_loss = trainSong(model, filepath, loss_function, optimizer, cuda_device)
+        avg_loss = trainSong(model, filepath, loss_function, optimizer, cuda_device, wandb_enable)
         logging.debug(f'Trained on: {filepath} / Average loss: {avg_loss}')
+        logging.info(f'{100 * index // num_songs}% ({index} / {num_songs})')
 
     return model
 
@@ -90,16 +93,17 @@ def makeSong(model, path, cuda_device):
     return song
 
 
-def runModel(model, num_songs, save=True, cuda_device=None):
+def runModel(model, num_songs, write_to=None, cuda_device=None):
     basepath = Path(BASE_FILE_PATH)
     outs = []
     for _ in range(num_songs):
         filepath = getRandomFile()
         song = makeSong(model, filepath, cuda_device)
-        exprsco = int_codec.internalToExpressive(song)
+        exprsco = InternalCodec.internalToExpressive(song)
         outs.append(exprsco)
-        if save:
-            outpath = Path(BASE_WRITE_PATH).joinpath(
+        if write_to:
+            outpath = Path(write_to).joinpath(
                 Path(filepath).relative_to(basepath))
-            codec.saveFile(outpath, exprsco)
+            ExpressiveCodec.saveFile(outpath, exprsco)
+            logging.info(f'Saved {outpath}')
     return outs
