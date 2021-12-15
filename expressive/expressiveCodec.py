@@ -23,7 +23,7 @@ def loadFile(path):
         logging.error(e)
         exit(1)
 
-    logging.info(f'Opened {filename}')
+    logging.debug(f'Opened {filename}')
     logging.debug(f'Temporal discretization rate: {rate}')
     logging.debug(f'Length of original VGM: {round(nsamps / 44100, 2)}s')
     
@@ -48,7 +48,7 @@ def saveFile(path, exprsco):
     try:
         with open(path, 'wb') as f:
             pickle.dump((24.0, nsamps, exprsco), f)
-            logging.info(f'Saved {filename}')
+            logging.debug(f'Saved {filename}')
     except pickle.PickleError as e:
         logging.error(f'Failed to pickle {filename}:')
         logging.error(e)
