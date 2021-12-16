@@ -22,7 +22,8 @@ def train(num_songs,
         wandb.init(project='nes-generator', entity='cs4100final')
         wandb.config = {
             "learning_rate": learning_rate,
-            "epochs": num_songs, "batch_size": 1
+            "epochs": epochs,
+            "batch_size": num_songs
         }
 
     model = lstm.MusicLSTM(hidden_dimension)
@@ -46,6 +47,7 @@ def train(num_songs,
 
     return model
 
+
 def generate_songs(model,
                    out_folder,
                    num_songs,
@@ -60,12 +62,14 @@ def make_deterministic():
     torch.manual_seed(hash("by removing stochasticity") % 2 ** 32 - 1)
     torch.cuda.manual_seed_all(hash("so runs are repeatable") % 2 ** 32 - 1)
 
+
 def init_cuda(cuda_enable):
     cuda_device = None
     if cuda_enable:
         if torch.cuda.is_available():
             cuda_device = torch.cuda.current_device()
-            logging.info('Using CUDA device: ' + torch.cuda.get_device_name(cuda_device))
+            logging.info('Using CUDA device: ' +
+                         torch.cuda.get_device_name(cuda_device))
         else:
             logging.warning('No CUDA device detected; falling back to CPU.')
     return cuda_device

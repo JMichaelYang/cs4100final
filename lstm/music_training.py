@@ -72,9 +72,11 @@ def trainModel(model, num_songs, epochs, learning_rate, cuda_device=None, wandb_
         random.shuffle(queue)
         model.zero_grad()
         for index, filepath in enumerate(queue):
-            avg_loss = trainSong(model, filepath, loss_function, optimizer, cuda_device, wandb_enable, epoch)
+            avg_loss = trainSong(model, filepath, loss_function,
+                                 optimizer, cuda_device, wandb_enable, epoch)
             logging.debug(f'Trained on: {filepath} / Average loss: {avg_loss}')
-            logging.info(f'{100 * index // (epoch * num_songs)}% ({index} / {epoch * num_songs})')
+            logging.info(
+                f'Epoch: {epoch} | {100 * index / num_songs}% ({index} / {num_songs})')
 
     return model
 

@@ -18,7 +18,7 @@ subparsers = argparser.add_subparsers(help='sub-command help', dest='program')
 parser_train = subparsers.add_parser('train', help="Train a new model")
 
 parser_train.add_argument('--input-songs', type=int, default=25,
-                          help='How many epochs to train the model')
+                          help='How many songs to train the model with')
 
 parser_train.add_argument('--epochs', type=int, default=25,
                           help='How many times to run over the input data')
@@ -30,7 +30,8 @@ parser_train.add_argument('--no-save', action='store_true', default=False)
 parser_train.add_argument('--output-songs', type=int, default=1,
                           help='How many songs to generate after training')
 
-parser_train.add_argument('--disable-wandb', action='store_true', default=False)
+parser_train.add_argument(
+    '--disable-wandb', action='store_true', default=False)
 
 parser_train.add_argument('--hidden-size', type=int, default=512,
                           help='How large should the hidden layer be?')
@@ -47,15 +48,20 @@ parser_play = subparsers.add_parser('play', help="Play a sound file")
 parser_play.add_argument('location', type=str, nargs='?', default=None,
                          help='The file to play')
 
+parser_play = subparsers.add_parser(
+    'convert', help="Convert a pkl file to exprsco")
+
+parser_play.add_argument('location', type=str, nargs='?', default=None,
+                         help='The file to convert')
+
 subparsers.default = None
 
 
-def parse_subcommands(extra = None):
+def parse_subcommands(extra=None):
     args, extra = argparser.parse_known_args(extra)
     if len(extra):
         return [args] + parse_subcommands(extra)
     return [args]
-
 
 
 def main():
@@ -70,9 +76,11 @@ def main():
 
         if namespace.program == 'train':
             cl.printHeader('    Training model')
+            logging.debug(f'epochs: {namespace.epochs}')
             logging.debug(f'input songs: {namespace.input_songs}')
             logging.debug(f'hidden dimension: {namespace.hidden_size}')
-            logging.debug(f'learning rate: {namespace.learning_rate if namespace.learning_rate else "default"}')
+            logging.debug(
+                f'learning rate: {namespace.learning_rate if namespace.learning_rate else "default"}')
             logging.debug(f'output songs: {namespace.output_songs}')
             if namespace.no_save:
                 logging.debug('Not saving output')
@@ -93,9 +101,11 @@ def main():
                           not namespace.disable_wandb)
 
             if namespace.output_songs:
-                cl.printHeader(f'Generating {namespace.output_songs} song{"s" if namespace.output_songs > 1 else ""}')
+                cl.printHeader(
+                    f'Generating {namespace.output_songs} song{"s" if namespace.output_songs > 1 else ""}')
                 training_output = generate_songs(model,
-                                                 namespace.output_folder if (not namespace.no_save) else None,
+                                                 namespace.output_folder if (
+                                                     not namespace.no_save) else None,
                                                  namespace.output_songs,
                                                  cuda_device)
 
@@ -108,6 +118,13 @@ def main():
                     namespace.location = './test/resources/295_SilverSurfer_02_03SectionStart.exprsco.pkl'
                 data = loadFile(namespace.location)
                 play(data)
+
+        if namespace.program == 'convert':
+            cl.printHeader('    Converting file')
+            if not namespace.location:
+                namespace.location = './test/resources/295_SilverSurfer_02_03SectionStart.exprsco.pkl'
+            data = loadFile(namespace.location)
+            print(data)
 
     print('Done.')
 

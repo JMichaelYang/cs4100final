@@ -5,38 +5,49 @@ class MusicLSTM(nn.Module):
     def __init__(self, hidden_dim):
         super(MusicLSTM, self).__init__()
 
+        self.call_counter = 0
         self.input_dim = 15
         self.hidden_dim = hidden_dim
-        self.num_layers = 2
+        self.num_layers = 1
 
-        self.lstm = nn.LSTM(
-            input_size=self.input_dim, hidden_size=64,
+        self.lstm_0 = nn.LSTM(
+            input_size=self.input_dim, hidden_size=512,
             num_layers=self.num_layers, batch_first=True)
 
-        self.dense_1 = nn.Linear(in_features=64,
-                                 out_features=1024)
+        self.dropout_0 = nn.Dropout(p=0.3)
 
-        self.lstm_2 = nn.LSTM(
-            input_size=1024, hidden_size=256,
+        self.lstm_1 = nn.LSTM(
+            input_size=512, hidden_size=512,
             num_layers=self.num_layers, batch_first=True
         )
 
-        self.fc = nn.Linear(in_features=256,
-                            out_features=self.input_dim)
+        self.dropout_1 = nn.Dropout(p=0.3)
 
-        self.call_counter = 0
+        self.lstm_2 = nn.LSTM(
+            input_size=512, hidden_size=512,
+            num_layers=self.num_layers, batch_first=True
+        )
+
+        self.dense_0 = nn.Linear(in_features=512,
+                                 out_features=256)
+
+        self.dropout_2 = nn.Dropout(p=0.3)
+
+        self.dense_1 = nn.Linear(in_features=256,
+                                 out_features=self.input_dim)
 
         self.double()
 
     def forward(self, timestep):
-        lstm_out, _ = self.lstm(timestep)
-        lstm_out = self.dense_1(lstm_out)
-        lstm_out, _ = self.lstm_2(lstm_out)
-        lstm_out = self.fc(lstm_out)
+        out, _ = self.lstm_0(timestep)
+        out = self.dropout_0(out)
+        out, _ = self.lstm_1(out)
+        out = self.dropout_1(out)
+        out, _ = self.lstm_2(out)
+        out = self.dense_0(out)
+        out = self.dropout_2(out)
+        out = self.dense_1(out)
         self.call_counter += 1
-        # if self.call_counter % 24 == 0:
-        # print(f'lstm_out: {lstm_out}')
-        # print(f'hidden_state: {hs}')
-        # print(f'cell_state: {cs}')
 
-        return lstm_out
+        # print(f'lstm_out: {out}')
+        return out
